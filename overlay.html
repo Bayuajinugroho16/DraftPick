@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esports Broadcast Overlay - Futuristic Cyber Minimalist</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS Tambahan Langsung untuk Memperbaiki Animasi, Potongan Ban, dan Efek Hitam Putih */
+        
+        /* 1. Animasi Transisi Halus Saat Hero Berubah (Smooth Pick/Ban) */
+        .image-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top; /* Fokus ke area atas/muka hero */
+            transition: opacity 0.5s ease-in-out, filter 0.3s ease;
+            opacity: 0;
+        }
+        
+        /* Ketika src gambar terisi, buat transisi muncul yang halus */
+        .image-display img[src^="http"], 
+        .image-display img[src^="Assets"],
+        .image-display img[src*="/"] {
+            opacity: 1;
+        }
+
+        /* 2. Optimasi Slot Ban: Hanya Muka & Efek Hitam Putih (Grayscale) */
+        .ban-img-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ban-img-container img {
+            object-fit: cover;
+            object-position: 50% 15%; /* Mengunci posisi potret tepat di area muka/kepala hero */
+            filter: grayscale(100%) contrast(110%); /* Membuat hero ban menjadi Hitam Putih tegas */
+        }
+    </style>
+</head>
+<body>
+
+<div class="overlay-container">
+    <div class="vignette-shadow"></div>
+
+    <div class="side-block blue-block">
+        <div class="ban-row">
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-blue-ban-1" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-blue-ban-2" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-blue-ban-3" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-blue-ban-4" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-blue-ban-5" src="" alt=""></div></div></div>
+        </div>
+        
+        <div class="team-header">
+            <div class="teamnameblue">
+                <div class="team-name-display" id="view-blue-name">BLUE TEAM</div>
+            </div>
+            <div class="bluelogo">
+                <div class="image-container">
+                    <img id="view-blue-logo" src="Assets/Logo/default-blue.png" alt="Logo Blue">
+                </div>
+            </div>
+        </div>
+
+        <div class="pick-row id-blue-picks">
+            <div class="pick1">
+                <div class="image-display"><img id="view-blue-pick-1" src="" alt=""></div>
+                <div class="nameholder"><p id="view-blue-nick-1">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-blue-pick-2" src="" alt=""></div>
+                <div class="nameholder"><p id="view-blue-nick-2">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-blue-pick-3" src="" alt=""></div>
+                <div class="nameholder"><p id="view-blue-nick-3">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-blue-pick-4" src="" alt=""></div>
+                <div class="nameholder"><p id="view-blue-nick-4">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-blue-pick-5" src="" alt=""></div>
+                <div class="nameholder"><p id="view-blue-nick-5">-</p></div>
+            </div>
+        </div>
+        
+        <div class="strip-bawah">
+            <div id="view-blue-footer" class="footer-text">MATCH 1</div>
+        </div>
+    </div>
+
+    <div class="tournamentinfo">
+        <div class="tournamentlogo"> 
+            <img class="logoprop" src="Assets/Other/tournamentlogo.png" alt="SISFO CUP LOGO">
+        </div>
+
+        <div class="timer-container" id="id-timer">
+            <div id="timer-display">30</div>
+        </div>
+
+        <div class="match-info-box">
+            <span class="ornamen-slash">///</span>
+            <div class="tournamentname">
+                <p id="view-match-title" class="tournamentnamemid">GRAND FINAL</p>
+            </div>
+            <span class="ornamen-slash">///</span>
+        </div>
+
+        <div class="vslogo-container">
+            <p class="by-text">BY TAKAPEDIA</p>
+        </div>
+
+        <div class="winlose">
+            <div class="win1">
+                <div class="w"><div class="wimg"><img id="view-blue-win-1" src="Assets/Icon/dot.png" alt=""></div></div>
+                <div class="w"><div class="wimg"><img id="view-blue-win-2" src="Assets/Icon/dot.png" alt=""></div></div>
+            </div>
+            <div class="midwin"></div>
+            <div class="win1">
+                <div class="w"><div class="wimg"><img id="view-red-win-1" src="Assets/Icon/dot.png" alt=""></div></div>
+                <div class="w"><div class="wimg"><img id="view-red-win-2" src="Assets/Icon/dot.png" alt=""></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-block red-block">
+        <div class="ban-row red-ban">
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-red-ban-1" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-red-ban-2" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-red-ban-3" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-red-ban-4" src="" alt=""></div></div></div>
+            <div class="ban1"><div class="image-display"><div class="ban-img-container"><img id="view-red-ban-5" src="" alt=""></div></div></div>
+        </div>
+
+        <div class="team-header red-header">
+            <div class="redlogo">
+                <div class="image-container">
+                    <img id="view-red-logo" src="Assets/Logo/default-red.png" alt="Logo Red">
+                </div>
+            </div>
+            <div class="teamnamered">
+                <div class="team-name-display" id="view-red-name">RED TEAM</div>
+            </div>
+        </div>
+
+        <div class="pick-row id-red-picks">
+            <div class="pick1">
+                <div class="image-display"><img id="view-red-pick-1" src="" alt=""></div>
+                <div class="nameholder"><p id="view-red-nick-1">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-red-pick-2" src="" alt=""></div>
+                <div class="nameholder"><p id="view-red-nick-2">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-red-pick-3" src="" alt=""></div>
+                <div class="nameholder"><p id="view-red-nick-3">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-red-pick-4" src="" alt=""></div>
+                <div class="nameholder"><p id="view-red-nick-4">-</p></div>
+            </div>
+            <div class="pick1">
+                <div class="image-display"><img id="view-red-pick-5" src="" alt=""></div>
+                <div class="nameholder"><p id="view-red-nick-5">-</p></div>
+            </div>
+        </div>
+        
+        <div class="strip-bawah">
+            <div id="view-red-footer" class="footer-text text-kanan">MATCH 1</div>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    function renderData(data) {
+        if (!data) return;
+
+        // Teks Info Utama & Footer
+        document.getElementById('view-blue-name').innerText = data.blueName || "BLUE TEAM";
+        document.getElementById('view-red-name').innerText = data.redName || "RED TEAM";
+        document.getElementById('view-match-title').innerText = data.matchTitle || "GRAND FINAL";
+        document.getElementById('view-blue-footer').innerText = data.blueFooter || "MATCH 1";
+        document.getElementById('view-red-footer').innerText = data.redFooter || "MATCH 1";
+        
+        // Logo Tim Utama
+        document.getElementById('view-blue-logo').src = data.blueLogo || "Assets/Logo/default-blue.png";
+        document.getElementById('view-red-logo').src = data.redLogo || "Assets/Logo/default-red.png";
+        
+        // Timer
+        const timerDisplay = document.getElementById('timer-display');
+        timerDisplay.innerText = data.timerValue || "30";
+        if(data.isCritical) {
+            timerDisplay.classList.add('critical');
+        } else {
+            timerDisplay.classList.remove('critical');
+        }
+
+        // Score Win Indicator Bulat
+        for(let i=1; i<=2; i++) {
+            document.getElementById(`view-blue-win-${i}`).className = data[`blueWin${i}`] ? 'active' : '';
+            document.getElementById(`view-red-win-${i}`).className = data[`redWin${i}`] ? 'active' : '';
+        }
+
+        // Update Gambar Ban Hero
+        for(let i=1; i<=5; i++) {
+            document.getElementById(`view-blue-ban-${i}`).src = data[`blueBan${i}`] || "";
+            document.getElementById(`view-red-ban-${i}`).src = data[`redBan${i}`] || "";
+        }
+
+        // Update Gambar Pick Hero & Nickname
+        for(let i=1; i<=5; i++) {
+            document.getElementById(`view-blue-pick-${i}`).src = data[`bluePick${i}`] || "";
+            document.getElementById(`view-blue-nick-${i}`).innerText = data[`blueNick${i}`] || "-";
+
+            document.getElementById(`view-red-pick-${i}`).src = data[`redPick${i}`] || "";
+            document.getElementById(`view-red-nick-${i}`).innerText = data[`redNick${i}`] || "-";
+        }
+    }
+
+    socket.on('pushToOverlay', (data) => { renderData(data); });
+    socket.on('initData', (data) => { renderData(data); });
+</script>
+</body>
+</html>

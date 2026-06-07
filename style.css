@@ -1,0 +1,370 @@
+/* IMPORT FONTS & UTILITIES */
+@font-face {
+    font-family: 'bebas neue';
+    src: url('Assets/Font/BebasNeue-Regular.otf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'bebas neue', sans-serif;
+    background-color: #00ff62; /* Green Screen chroma key untuk OBS streaming */
+    color: #f5f5f5;
+    margin: 0;
+    padding: 10px;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   MAIN BROADCAST OVERLAY CONTAINER (2048 x 292 PROPORSIONAL)
+   ========================================================================== */
+.overlay-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    position: relative;
+    width: 100%;
+    max-width: 2048px;
+    height: 292px;
+    margin: 0 auto;
+    background: #050505;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.vignette-shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* ==========================================================================
+   PANEL TIM (KIRI & KANAN) - BACKGROUND PATTERN LABYRINTH GEOMETRIC
+   ========================================================================== */
+.side-block {
+    display: flex;
+    flex-direction: column;
+    width: 43%;
+    height: 100%;
+    padding: 15px 20px 0 20px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+}
+
+.blue-block {
+    background: 
+        linear-gradient(225deg, rgba(12, 31, 68, 0.95) 0%, rgba(5, 5, 5, 0.98) 100%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 12px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 12px);
+    box-shadow: inset 50px 0 60px -30px rgba(0, 207, 255, 0.15);
+}
+
+.red-block {
+    background: 
+        linear-gradient(135deg, rgba(90, 16, 38, 0.95) 0%, rgba(5, 5, 5, 0.98) 100%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 12px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 12px);
+    box-shadow: inset -50px 0 60px -30px rgba(255, 42, 109, 0.15);
+}
+
+/* ==========================================================================
+   BAN PLAYER SLOT (MIRRORING SKEW - HADAP BERLAWANAN)
+   ========================================================================== */
+.ban-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    z-index: 3;
+}
+.red-ban {
+    justify-content: flex-end;
+}
+
+.ban1 {
+    width: 38px;
+    height: 34px;
+    background-color: #050505;
+    border: 2px solid #f5f5f5;
+    border-radius: 0%; 
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+/* Sisi Kiri (Blue): Frame miring ke kiri, Gambar dinetralkan ke kanan */
+.blue-block .ban1 {
+    transform: skewX(-15deg);
+}
+.blue-block .ban1 .image-display {
+    width: 130%; 
+    height: 100%;
+    position: absolute;
+    left: -15%;
+    transform: skewX(15deg); 
+}
+
+/* Sisi Kanan (Red): Frame miring ke kanan, Gambar dinetralkan ke kiri */
+.red-block .ban1 {
+    transform: skewX(15deg);
+}
+.red-block .ban1 .image-display {
+    width: 130%; 
+    height: 100%;
+    position: absolute;
+    left: -15%;
+    transform: skewX(-15deg); 
+}
+
+.ban1 .image-display img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ==========================================================================
+   IDENTITAS SEKOLAH & LOGO MASKOT POINTER (FIXED SIMETRIS KANAN-KIRI)
+   ========================================================================== */
+.team-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    position: relative;
+    height: 45px;
+}
+/* Menyeimbangkan tata letak row teks agar tidak tabrakan */
+.blue-header { padding-right: 55px; } 
+.red-header { padding-left: 55px; }
+
+.team-name-display {
+    font-family: 'bebas neue', sans-serif;
+    font-size: 32px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #f5f5f5;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(5, 5, 5, 0.9);
+}
+
+.teamnameblue { padding-left: 5px; width: 100%; }
+.teamnamered { padding-right: 5px; width: 100%; text-align: right; }
+
+/* PERBAIKAN UTAMA: Mengunci posisi Logo Tim di Ujung Dalam menempel batas tengah secara presisi */
+.bluelogo, .redlogo {
+    position: absolute;
+    top: 0px; /* Sejajar lurus dengan teks nama team */
+    width: 45px;
+    height: 45px;
+    z-index: 10;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+}
+.bluelogo { right: 0px; }  /* Menempel di ujung kanan sisi Blue (Dekat Panel Tengah) */
+.redlogo { left: 0px; }   /* Menempel di ujung kiri sisi Red (Dekat Panel Tengah) */
+
+.bluelogo .image-container, .redlogo .image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.bluelogo img, .redlogo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   SLOT HERO / PLAYER CARD (KOTAK SOLID ORIGINAL)
+   ========================================================================== */
+.pick-row {
+    display: flex;
+    gap: 3px;
+    width: 100%;
+}
+
+.pick1 {
+    flex: 1;
+    height: 125px;
+    background-color: #050505;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.blue-block .pick1 { border-left: 2px solid #00cfff; }
+.red-block .pick1 { border-right: 2px solid #ff2a6d; }
+
+.nameholder {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 24px;
+    background: rgba(5, 5, 5, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 4;
+}
+.nameholder p {
+    margin: 0;
+    font-size: 13px;
+    color: #f5f5f5;
+    letter-spacing: 1px;
+}
+
+.strip-bawah { width: 100%; margin-top: 10px; }
+.footer-text {
+    font-family: 'bebas neue', sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+    letter-spacing: 6px;
+    text-shadow: 0px 1px 2px #00dfcc;
+}
+.text-kanan { text-align: right; }
+
+/* ==========================================================================
+   PANEL TENGAH: TOURNEY PANEL (UKURAN LOGO 150%)
+   ========================================================================== */
+.tournamentinfo {
+    width: 14%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 15px 5px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 3;
+    background: 
+        linear-gradient(180deg, #251338 0%, #050505 100%),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 6px);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    outline: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tournamentlogo {
+    width: 128px;       
+    height: 128px;      
+    margin-top: -30px;  
+    margin-bottom: 5px;
+    filter: drop-shadow(0px 0px 15px rgba(0, 207, 255, 0.5));
+    animation: floating 4s ease-in-out infinite;
+    z-index: 10;
+}
+@keyframes floating {
+    0% { transform: translateY(-5px); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(-5px); }
+}
+.logoprop { width: 100%; height: 100%; object-fit: contain; }
+
+.match-info-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 5px;
+}
+.ornamen-slash { color: rgba(255, 255, 255, 0.4); font-size: 14px; font-style: italic; font-weight: bold; letter-spacing: -2px; }
+.tournamentnamemid { font-size: 16px; margin: 0; color: #f5f5f5; letter-spacing: 2px; font-weight: bold; text-shadow: 0px 0px 4px rgba(255, 255, 255, 0.2); }
+
+.vslogo-container { margin-top: 2px; margin-bottom: 5px; }
+.by-text { font-size: 11px; color: rgba(245, 245, 245, 0.6); margin: 0; letter-spacing: 1px; }
+
+/* ==========================================================================
+   WIN TRACKER DOTS ENGINE
+   ========================================================================== */
+.winlose { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; box-sizing: border-box; margin-top: 5px; }
+.win1 { display: flex; gap: 5px; }
+.wimg { width: 11px; height: 11px; }
+
+.wimg img {
+    width: 100%; height: 100%; object-fit: contain;
+    filter: grayscale(100%) brightness(30%); 
+    transition: filter 0.2s ease-in-out, drop-shadow 0.2s ease-in-out;
+}
+.win1:first-child .wimg img.active {
+    filter: grayscale(0%) sepia(100%) hue-rotate(140deg) saturate(1000%) brightness(130%) !important;
+    filter: drop-shadow(0 0 6px rgba(0, 207, 255, 0.9)) !important;
+}
+.win1:last-child .wimg img.active {
+    filter: grayscale(0%) sepia(100%) hue-rotate(300deg) saturate(1200%) brightness(120%) !important;
+    filter: drop-shadow(0 0 6px rgba(255, 42, 109, 0.9)) !important;
+}
+
+/* ==========================================================================
+   COUNTDOWN TIMER ELEMENT DESIGN
+   ========================================================================== */
+.timer-container { margin-bottom: 5px; z-index: 4; }
+#timer-display {
+    font-family: 'bebas neue', sans-serif;
+    font-size: 52px;
+    font-weight: bold;
+    color: #03fffb;
+    letter-spacing: 2px;
+    text-shadow: 0 0 12px #03fffb;
+    line-height: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+    opacity: 1;
+}
+#timer-display.critical {
+    color: #ff2a6d;
+    text-shadow: 0 0 15px rgba(255, 42, 109, 0.9);
+    animation: pulse-blink 0.5s infinite alternate;
+}
+@keyframes pulse-blink {
+    0% { opacity: 0.4; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1.05); }
+}
+
+/* ==========================================================================
+   TRANSISI HIDE / SHOW COMPONENT
+   ========================================================================== */
+.id-blue-picks, .id-red-picks, #id-timer {
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+    opacity: 1; transform: translateY(0); visibility: visible;
+}
+.element-hidden { opacity: 0 !important; transform: translateY(15px) !important; visibility: hidden !important; }
+#timer-display.timer-hidden { opacity: 0 !important; transform: scale(0.8); pointer-events: none; }
+
+/* ==========================================================================
+   PANEL KONTROL BROADCAST ADMIN (SISI BAWAH)
+   ========================================================================== */
+.control-panel-section { margin-top: 30px; background: #111115; padding: 20px; border-radius: 8px; border: 1px solid #22222a; }
+.control { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #22222a; padding-bottom: 15px; }
+.control h1 { margin: 0; font-size: 20px; color: #00cfff; letter-spacing: 1px; }
+.controlbutton { background: #1c1c24; color: #f5f5f5; border: 1px solid #333344; padding: 8px 16px; font-family: inherit; cursor: pointer; border-radius: 4px; transition: background 0.2s; }
+.controlbutton:hover { background: #333344; }
+.tournamentnamebox { padding: 8px; background: #050505; border: 1px solid #22222a; color: #fff; font-family: inherit; }
+.allcontrol { display: flex; gap: 30px; }
+.control-group { flex: 1; background: rgba(5,5,5,0.6); padding: 20px; border-radius: 6px; border: 1px solid #1c1c24; }
+.control-group h2 { margin-top: 0; font-size: 16px; color: #ff2a6d; }
+.control-group h3 { font-size: 13px; color: #777; margin-top: 15px; }
+.nick-inputs { display: flex; flex-direction: column; gap: 8px; margin: 15px 0; }
+.nick-inputs input, .control-group > input[type="text"], .control-group > input[type="file"] { background: #050505; border: 1px solid #22222a; color: #fff; padding: 8px; font-family: inherit; width: 100%; box-sizing: border-box; }
+.checkbox-container { display: flex; gap: 12px; align-items: center; margin-bottom: 15px; }
+.checkbox-container h4 { margin: 0; font-size: 13px; color: #ccc; }
+.dropdown-container { position: relative; margin-bottom: 6px; }
+.dropdown { width: 100%; padding: 7px; background: #050505; border: 1px solid #22222a; color: #fff; box-sizing: border-box; font-family: inherit; }
+.dropdown-items { position: absolute; width: 100%; max-height: 120px; overflow-y: auto; background-color: #111115; border: 1px solid #22222a; z-index: 20; }
+.image-display img { width: 100%; height: 100%; object-fit: cover; }
+.fly-in { animation: flyIn 0.7s forwards ease-out; }
+.fly-out { animation: flyOut 0.6s forwards ease-in; }
+@keyframes flyIn { 0% { opacity: 0; transform: translateY(25px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes flyOut { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(40px); } }
