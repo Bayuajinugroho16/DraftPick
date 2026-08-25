@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control - SISFO CUP V2</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="admin-container">
+
+    <h1>🎮 SISFO CUP 2026 - ADMIN CONTROL</h1>
+    
+    <!-- Status Koneksi -->
+    <div class="status-bar" id="statusBar">
+        <span id="connectionStatus">⏳ Connecting...</span>
+        <span id="clientCount">Clients: 0</span>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ROW 1: Tournament Info & Timer -->
+    <!-- ============================================================ -->
+    <div class="row">
+
+        <div class="panel">
+            <h2>🏆 Tournament Info</h2>
+            <label>Match Title</label>
+            <input type="text" id="matchTitle" value="GRAND FINAL" onchange="sendUpdate()">
+            
+            <label>Blue Footer</label>
+            <input type="text" id="blueFooter" value="MATCH 1" onchange="sendUpdate()">
+            
+            <label>Red Footer</label>
+            <input type="text" id="redFooter" value="MATCH 1" onchange="sendUpdate()">
+        </div>
+
+        <div class="panel">
+            <h2>⏱️ Timer Control</h2>
+            <div class="timer-control">
+                <input type="number" id="timerValue" value="30" min="0" max="99" onchange="sendUpdate()">
+                <div class="timer-buttons">
+                    <button class="btn btn-success" onclick="startTimer()">▶ START</button>
+                    <button class="btn btn-warning" onclick="pauseTimer()">⏸ PAUSE</button>
+                    <button class="btn btn-danger" onclick="resetTimer()">⟳ RESET</button>
+                </div>
+            </div>
+            <label>
+                <input type="checkbox" id="isCritical" onchange="sendUpdate()"> Critical Mode (Red Timer)
+            </label>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ROW 2: Team Names & Logos -->
+    <!-- ============================================================ -->
+    <div class="row">
+
+        <div class="panel blue-panel">
+            <h2>🔵 BLUE TEAM</h2>
+            <label>Team Name</label>
+            <input type="text" id="blueName" value="BLUE TEAM" onchange="sendUpdate()">
+            
+            <label>Logo</label>
+            <div class="logo-upload">
+                <img id="blueLogoPreview" src="Assets/Logo/default-blue.png" alt="Blue Logo">
+                <input type="file" id="blueLogoInput" accept="image/*" onchange="uploadLogo('blue', event)">
+            </div>
+            
+            <label>Score (Win)</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="blueWin1" onchange="sendUpdate()"> Win 1</label>
+                <label><input type="checkbox" id="blueWin2" onchange="sendUpdate()"> Win 2</label>
+            </div>
+        </div>
+
+        <div class="panel red-panel">
+            <h2>🔴 RED TEAM</h2>
+            <label>Team Name</label>
+            <input type="text" id="redName" value="RED TEAM" onchange="sendUpdate()">
+            
+            <label>Logo</label>
+            <div class="logo-upload">
+                <img id="redLogoPreview" src="Assets/Logo/default-red.png" alt="Red Logo">
+                <input type="file" id="redLogoInput" accept="image/*" onchange="uploadLogo('red', event)">
+            </div>
+            
+            <label>Score (Win)</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="redWin1" onchange="sendUpdate()"> Win 1</label>
+                <label><input type="checkbox" id="redWin2" onchange="sendUpdate()"> Win 2</label>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ROW 3: Bans & Picks -->
+    <!-- ============================================================ -->
+    <div class="row">
+
+        <!-- BLUE BANS -->
+        <div class="panel blue-panel">
+            <h2>🚫 BLUE BANS</h2>
+            <div class="ban-inputs">
+                <input type="text" id="blueBan1" placeholder="Ban 1" onchange="sendUpdate()">
+                <input type="text" id="blueBan2" placeholder="Ban 2" onchange="sendUpdate()">
+                <input type="text" id="blueBan3" placeholder="Ban 3" onchange="sendUpdate()">
+                <input type="text" id="blueBan4" placeholder="Ban 4" onchange="sendUpdate()">
+                <input type="text" id="blueBan5" placeholder="Ban 5" onchange="sendUpdate()">
+            </div>
+        </div>
+
+        <!-- RED BANS -->
+        <div class="panel red-panel">
+            <h2>🚫 RED BANS</h2>
+            <div class="ban-inputs">
+                <input type="text" id="redBan1" placeholder="Ban 1" onchange="sendUpdate()">
+                <input type="text" id="redBan2" placeholder="Ban 2" onchange="sendUpdate()">
+                <input type="text" id="redBan3" placeholder="Ban 3" onchange="sendUpdate()">
+                <input type="text" id="redBan4" placeholder="Ban 4" onchange="sendUpdate()">
+                <input type="text" id="redBan5" placeholder="Ban 5" onchange="sendUpdate()">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ROW 4: PICKS & NICKNAMES -->
+    <!-- ============================================================ -->
+    <div class="row">
+
+        <!-- BLUE PICKS -->
+        <div class="panel blue-panel">
+            <h2>🔵 BLUE PICKS & NICKNAMES</h2>
+            <div class="pick-inputs">
+                <div class="pick-row">
+                    <input type="text" id="bluePick1" placeholder="Hero 1" onchange="sendUpdate()">
+                    <input type="text" id="blueNick1" placeholder="Nick 1" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="bluePick2" placeholder="Hero 2" onchange="sendUpdate()">
+                    <input type="text" id="blueNick2" placeholder="Nick 2" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="bluePick3" placeholder="Hero 3" onchange="sendUpdate()">
+                    <input type="text" id="blueNick3" placeholder="Nick 3" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="bluePick4" placeholder="Hero 4" onchange="sendUpdate()">
+                    <input type="text" id="blueNick4" placeholder="Nick 4" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="bluePick5" placeholder="Hero 5" onchange="sendUpdate()">
+                    <input type="text" id="blueNick5" placeholder="Nick 5" onchange="sendUpdate()">
+                </div>
+            </div>
+        </div>
+
+        <!-- RED PICKS -->
+        <div class="panel red-panel">
+            <h2>🔴 RED PICKS & NICKNAMES</h2>
+            <div class="pick-inputs">
+                <div class="pick-row">
+                    <input type="text" id="redPick1" placeholder="Hero 1" onchange="sendUpdate()">
+                    <input type="text" id="redNick1" placeholder="Nick 1" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="redPick2" placeholder="Hero 2" onchange="sendUpdate()">
+                    <input type="text" id="redNick2" placeholder="Nick 2" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="redPick3" placeholder="Hero 3" onchange="sendUpdate()">
+                    <input type="text" id="redNick3" placeholder="Nick 3" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="redPick4" placeholder="Hero 4" onchange="sendUpdate()">
+                    <input type="text" id="redNick4" placeholder="Nick 4" onchange="sendUpdate()">
+                </div>
+                <div class="pick-row">
+                    <input type="text" id="redPick5" placeholder="Hero 5" onchange="sendUpdate()">
+                    <input type="text" id="redNick5" placeholder="Nick 5" onchange="sendUpdate()">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ROW 5: ACTION BUTTONS -->
+    <!-- ============================================================ -->
+    <div class="row action-row">
+        <button class="btn btn-danger" onclick="resetAll()">⟳ RESET ALL DATA</button>
+        <button class="btn" onclick="switchTeams()">🔄 SWITCH TEAMS</button>
+        <button class="btn" onclick="clearBans()">🗑 CLEAR BANS</button>
+        <button class="btn" onclick="clearPicks()">🗑 CLEAR PICKS</button>
+    </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="admin.js"></script>
+
+</body>
+</html>

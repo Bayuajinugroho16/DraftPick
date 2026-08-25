@@ -5,18 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Kontrol Operator Draft Pick</title>
     <style>
-        body { background-color: #1a1a24; padding: 20px; font-family: sans-serif; color: #fff; }
-        .admin-box { max-width: 1300px; margin: 0 auto; background: #111115; border: 1px solid #22222a; padding: 25px; border-radius: 8px; }
-        .row { display: flex; gap: 20px; margin-bottom: 20px; }
-        .col { flex: 1; background: #1c1c24; padding: 15px; border-radius: 6px; border: 1px solid #2d2d3a; }
+        * { box-sizing: border-box; }
+        body { background-color: #1a1a24; padding: 20px; font-family: 'Segoe UI', sans-serif; color: #fff; }
+        .admin-box { max-width: 1400px; margin: 0 auto; background: #111115; border: 1px solid #22222a; padding: 25px; border-radius: 8px; }
+        .row { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 280px; background: #1c1c24; padding: 15px; border-radius: 6px; border: 1px solid #2d2d3a; }
+        h1 { color: #fff; font-size: 24px; margin-top:0; border-bottom: 2px solid #333; padding-bottom: 10px; }
         h2 { margin-top: 0; color: #00cfff; font-size: 18px; border-bottom: 1px solid #2d2d3a; padding-bottom: 8px; }
         h3 { font-size: 14px; color: #ffaa00; margin-top: 15px; margin-bottom: 5px; }
         label { display: block; margin: 10px 0 5px; color: #aaa; font-size: 13px; }
-        input[type="text"] { width: 100%; padding: 8px; background: #050505; border: 1px solid #333344; color: #fff; border-radius: 4px; box-sizing: border-box; }
-        button { background: #00cfff; color: #050505; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 14px; text-transform: uppercase; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; background: #050505; border: 1px solid #333344; color: #fff; border-radius: 4px; box-sizing: border-box; }
+        button { background: #00cfff; color: #050505; border: none; padding: 12px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 14px; text-transform: uppercase; transition: 0.2s; }
         button:hover { background: #009ec2; }
         .btn-timer { background: #ff2a6d; color: #fff; width: auto; margin-right: 5px; padding: 8px 15px; }
-        
+        .btn-timer:hover { background: #cc2255; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; width: auto; margin: 2px; }
+
+        /* BO3 / BO5 Toggle */
+        .toggle-group { display: flex; gap: 10px; margin: 10px 0; }
+        .toggle-btn { padding: 8px 20px; border: 2px solid #333; border-radius: 6px; background: transparent; color: #aaa; cursor: pointer; font-weight: bold; transition: 0.2s; width: auto; margin: 0; }
+        .toggle-btn.active-bo3 { border-color: #ffaa00; color: #ffaa00; background: rgba(255,170,0,0.1); }
+        .toggle-btn.active-bo5 { border-color: #00cfff; color: #00cfff; background: rgba(0,207,255,0.1); }
+
         /* CSS KHUSUS UNTUK KUSTOM DROPDOWN HERO */
         .search-container { position: relative; width: 100%; }
         .dropdown-items { 
@@ -32,599 +42,765 @@
             display: flex; align-items: center; justify-content: center; border: 1px dashed #333;
         }
         .image-preview-slot img { height: 100%; width: auto; object-fit: contain; }
+
+        /* Score Indicator Preview */
+        .score-preview { display: flex; gap: 8px; align-items: center; margin: 8px 0; padding: 8px; background: #0a0a12; border-radius: 6px; }
+        .score-dot { width: 24px; height: 24px; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); background: #1A1A1A; border: 1.5px solid rgba(255,255,255,0.10); transition: 0.3s; }
+        .score-dot.active-blue { background: #00E7FF; border-color: #00E7FF; box-shadow: 0 0 20px rgba(0,231,255,0.3); }
+        .score-dot.active-red { background: #FF4D7A; border-color: #FF4D7A; box-shadow: 0 0 20px rgba(255,77,122,0.3); }
+        .score-dot.inactive { opacity: 0.3; }
+        .score-label-preview { font-size: 11px; color: #666; margin-right: 4px; }
+
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .action-buttons button { width: auto; margin: 0; padding: 10px 18px; font-size: 13px; }
+        .btn-reset { background: #db2777; color: #fff; }
+        .btn-reset:hover { background: #b01d5f; }
+        .btn-switch { background: #555; color: #fff; }
+        .btn-switch:hover { background: #777; }
+        .btn-send { background: #22c55e; color: #fff; }
+        .btn-send:hover { background: #16a34a; }
+
+        /* Responsive */
+        @media (max-width: 768px) { .row { flex-direction: column; } .action-buttons { flex-direction: column; } .action-buttons button { width: 100%; } }
     </style>
 </head>
 <body>
 
-    <div class="admin-box">
-        <h1 style="color: #fff; font-size: 24px; margin-top:0; border-bottom: 2px solid #333; padding-bottom: 10px;">DRAFT PICK LAN CONTROLLER</h1>
-        
-        <div class="row">
-            <div class="col">
-                <h2>Tournament Info & Timer</h2>
-                <label>Judul Match (Tournament Mid)</label>
-                <input type="text" id="tournamentnamemid" value="GRAND FINAL">
-                
-                <label>Timer</label>
-                <input type="text" id="timer-display" value="30" style="width: 80px; text-align: center; font-size: 18px; font-weight: bold; color: #00cfff;">
-                <div style="display:flex; margin-top: 8px;">
-                    <button type="button" class="btn-timer" onclick="startTimer()">START</button>
-                    <button type="button" class="btn-timer" onclick="pauseTimer()" style="background:#ffaa00; color:#050505">PAUSE</button>
-                    <button type="button" class="btn-timer" onclick="resetTimer()" style="background:#555">RESET</button>
-                </div>
-            </div>
-            
-            <div class="col">
-                <h2>Score Tracker & Footer</h2>
-                <div style="display:flex; gap: 20px; margin-bottom: 5px;">
-                    <div>
-                        <label style="display:inline-block; margin-right:5px;">Blue Win 1</label><input type="checkbox" id="checkbox1" onchange="toggleImage('extraImage1')">
-                        <label style="display:inline-block; margin-left:15px; margin-right:5px;">Blue Win 2</label><input type="checkbox" id="checkbox2" onchange="toggleImage('extraImage2')">
-                    </div>
-                    <div>
-                        <label style="display:inline-block; margin-right:5px;">Red Win 1</label><input type="checkbox" id="checkbox3" onchange="toggleImage('extraImage3')">
-                        <label style="display:inline-block; margin-left:15px; margin-right:5px;">Red Win 2</label><input type="checkbox" id="checkbox4" onchange="toggleImage('extraImage4')">
-                    </div>
-                </div>
-                <label>Blue Footer Text</label>
-                <input type="text" id="blueFooter" value="MATCH 1">
-                <label>Red Footer Text</label>
-                <input type="text" id="redFooter" value="MATCH 1">
+<div class="admin-box">
+    <h1>🎮 DRAFT PICK LAN CONTROLLER</h1>
+
+    <!-- ============================================================ -->
+    <!-- ROW 1: Tournament Info & Timer -->
+    <!-- ============================================================ -->
+    <div class="row">
+        <div class="col">
+            <h2>🏆 Tournament Info & Timer</h2>
+            <label>Judul Match (Tournament Mid)</label>
+            <input type="text" id="tournamentnamemid" value="GRAND FINAL">
+
+            <label>Timer (detik)</label>
+            <input type="number" id="timer-display" value="30" style="width: 80px; text-align: center; font-size: 18px; font-weight: bold; color: #00cfff;">
+            <div style="display:flex; margin-top: 8px; flex-wrap:wrap;">
+                <button type="button" class="btn-timer" onclick="startTimer()">▶ START</button>
+                <button type="button" class="btn-timer" onclick="pauseTimer()" style="background:#ffaa00; color:#050505">⏸ PAUSE</button>
+                <button type="button" class="btn-timer" onclick="resetTimer()" style="background:#555">⟳ RESET</button>
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button onclick="switchInputs()" style="background: #333; color: #fff; margin: 0;">Tukar Semua Nickname</button>
-            <button onclick="switchAll()" style="background: #333; color: #fff; margin: 0;">Tukar Slot Tim Kiri & Kanan</button>
-            <button onclick="resetAllDropdowns(); resetInputs(); resetContent();" style="background: #db2777; color: #fff; margin: 0;">RESET DATA DRAFT</button>
-        </div>
+        <div class="col">
+            <h2>📊 Score Tracker & Footer</h2>
 
-        <div class="row">
-            <div class="col" style="border-left: 4px solid #00cfff;">
-                <h2>BLUE TEAM CONTROL</h2>
-                <label>Nama Tim Blue</label>
-                <input type="text" id="team1" value="BLUE TEAM" oninput="updateTeamName()">
-                <label>Logo Tim Blue</label>
-                <input type="text" id="blueLogo" value="Assets/Logo/default-blue.png">
+            <!-- BO3 / BO5 TOGGLE -->
+            <label style="font-weight:bold; color:#fff;">Format Pertandingan</label>
+            <div class="toggle-group">
+                <button class="toggle-btn" id="btn-bo3" onclick="setFormat('bo3')">BO3</button>
+                <button class="toggle-btn active-bo5" id="btn-bo5" onclick="setFormat('bo5')">BO5</button>
+            </div>
 
-                <h3>Bans (Ketik nama hero)</h3>
-                <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
-                    <div class="search-container">
-                        <input type="text" id="search-1" oninput="filterDropdown(1)" placeholder="Ban 1">
-                        <div id="dropdown-items-1" class="dropdown-items"></div>
-                        <div id="image-display-1" class="image-preview-slot"></div>
+            <!-- Score Indicator Preview -->
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:8px;">
+                <!-- BLUE SCORE -->
+                <div style="background:#0a0a12; padding:8px 12px; border-radius:6px; border-left:3px solid #00cfff;">
+                    <label style="color:#00cfff; font-size:12px; font-weight:bold; margin-bottom:4px;">🔵 BLUE</label>
+                    <div class="score-preview" id="blueScorePreview">
+                        <span class="score-label-preview">Win:</span>
+                        <div class="score-dot inactive" id="preview-blue-1"></div>
+                        <div class="score-dot inactive" id="preview-blue-2"></div>
+                        <div class="score-dot inactive" id="preview-blue-3"></div>
                     </div>
-                    <div class="search-container">
-                        <input type="text" id="search-2" oninput="filterDropdown(2)" placeholder="Ban 2">
-                        <div id="dropdown-items-2" class="dropdown-items"></div>
-                        <div id="image-display-2" class="image-preview-slot"></div>
-                    </div>
-                    <div class="search-container">
-                        <input type="text" id="search-3" oninput="filterDropdown(3)" placeholder="Ban 3">
-                        <div id="dropdown-items-3" class="dropdown-items"></div>
-                        <div id="image-display-3" class="image-preview-slot"></div>
-                    </div>
-                    <div class="search-container">
-                        <input type="text" id="search-4" oninput="filterDropdown(4)" placeholder="Ban 4">
-                        <div id="dropdown-items-4" class="dropdown-items"></div>
-                        <div id="image-display-4" class="image-preview-slot"></div>
-                    </div>
-                    <div class="search-container">
-                        <input type="text" id="search-5" oninput="filterDropdown(5)" placeholder="Ban 5">
-                        <div id="dropdown-items-5" class="dropdown-items"></div>
-                        <div id="image-display-5" class="image-preview-slot"></div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <label style="display:inline-block; font-size:13px; color:#aaa;">
+                            Win 1 <input type="checkbox" id="checkbox1" onchange="updateScorePreview()">
+                        </label>
+                        <label style="display:inline-block; font-size:13px; color:#aaa;">
+                            Win 2 <input type="checkbox" id="checkbox2" onchange="updateScorePreview()">
+                        </label>
+                        <label style="display:inline-block; font-size:13px; color:#aaa;" id="blueWin3Label">
+                            Win 3 <input type="checkbox" id="checkbox3" onchange="updateScorePreview()">
+                        </label>
                     </div>
                 </div>
 
-                <h3>Picks & Nicknames</h3>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-6" oninput="filterDropdown(6)" placeholder="Pilih Hero 1">
-                            <div id="dropdown-items-6" class="dropdown-items"></div>
-                            <div id="image-display-6" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input1" oninput="updateOutput()" placeholder="Nick 1" style="flex:1;">
+                <!-- RED SCORE -->
+                <div style="background:#0a0a12; padding:8px 12px; border-radius:6px; border-left:3px solid #ff2a6d;">
+                    <label style="color:#ff2a6d; font-size:12px; font-weight:bold; margin-bottom:4px;">🔴 RED</label>
+                    <div class="score-preview" id="redScorePreview">
+                        <span class="score-label-preview">Win:</span>
+                        <div class="score-dot inactive" id="preview-red-1"></div>
+                        <div class="score-dot inactive" id="preview-red-2"></div>
+                        <div class="score-dot inactive" id="preview-red-3"></div>
                     </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-7" oninput="filterDropdown(7)" placeholder="Pilih Hero 2">
-                            <div id="dropdown-items-7" class="dropdown-items"></div>
-                            <div id="image-display-7" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input2" oninput="updateOutput()" placeholder="Nick 2" style="flex:1;">
-                    </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-8" oninput="filterDropdown(8)" placeholder="Pilih Hero 3">
-                            <div id="dropdown-items-8" class="dropdown-items"></div>
-                            <div id="image-display-8" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input3" oninput="updateOutput()" placeholder="Nick 3" style="flex:1;">
-                    </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-9" oninput="filterDropdown(9)" placeholder="Pilih Hero 4">
-                            <div id="dropdown-items-9" class="dropdown-items"></div>
-                            <div id="image-display-9" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input4" oninput="updateOutput()" placeholder="Nick 4" style="flex:1;">
-                    </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-10" oninput="filterDropdown(10)" placeholder="Pilih Hero 5">
-                            <div id="dropdown-items-10" class="dropdown-items"></div>
-                            <div id="image-display-10" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input5" oninput="updateOutput()" placeholder="Nick 5" style="flex:1;">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <label style="display:inline-block; font-size:13px; color:#aaa;">
+                            Win 1 <input type="checkbox" id="checkbox4" onchange="updateScorePreview()">
+                        </label>
+                        <label style="display:inline-block; font-size:13px; color:#aaa;">
+                            Win 2 <input type="checkbox" id="checkbox5" onchange="updateScorePreview()">
+                        </label>
+                        <label style="display:inline-block; font-size:13px; color:#aaa;" id="redWin3Label">
+                            Win 3 <input type="checkbox" id="checkbox6" onchange="updateScorePreview()">
+                        </label>
                     </div>
                 </div>
             </div>
 
-            <div class="col" style="border-right: 4px solid #ff2a6d;">
-                <h2>RED TEAM CONTROL</h2>
-                <label>Nama Tim Red</label>
-                <input type="text" id="team2" value="RED TEAM" oninput="updateTeamName()">
-                <label>Logo Tim Red</label>
-                <input type="text" id="redLogo" value="Assets/Other/maskot-red.png">
-
-                <h3>Bans (Ketik nama hero)</h3>
-                <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
-                    <div class="search-container">
-                        <input type="text" id="search-11" oninput="filterDropdown(11)" placeholder="Ban 1">
-                        <div id="dropdown-items-11" class="dropdown-items"></div>
-                        <div id="image-display-11" class="image-preview-slot"></div>
-                    </div>
-                    <div class="search-container">
-                        <input type="text" id="search-12" oninput="filterDropdown(12)" placeholder="Ban 2">
-                        <div id="dropdown-items-12" class="dropdown-items"></div>
-                        <div id="image-display-12" class="image-preview-slot"></div>
-                    </div>
-                    <div class="search-container">
-                        <input type="text" id="search-13" oninput="filterDropdown(13)" placeholder="Ban 3">
-                        <div id="dropdown-items-13" class="dropdown-items"></div>
-                        <div id="image-display-13" class="image-preview-slot"></div>
-                    </div>
-                    <div class="search-container">
-                        <input type="text" id="search-14" oninput="filterDropdown(14)" placeholder="Ban 4">
-                        <div id="dropdown-items-14" class="dropdown-items"></div>
-                        <div id="image-display-14" class="image-preview-slot"></div>
-                    </div>
-                    <div class="search-container">
-                        <input type="text" id="search-15" oninput="filterDropdown(15)" placeholder="Ban 5">
-                        <div id="dropdown-items-15" class="dropdown-items"></div>
-                        <div id="image-display-15" class="image-preview-slot"></div>
-                    </div>
-                </div>
-
-                <h3>Picks & Nicknames</h3>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-16" oninput="filterDropdown(16)" placeholder="Pilih Hero 1">
-                            <div id="dropdown-items-16" class="dropdown-items"></div>
-                            <div id="image-display-16" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input6" oninput="updateOutput()" placeholder="Nick 6" style="flex:1;">
-                    </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-17" oninput="filterDropdown(17)" placeholder="Pilih Hero 2">
-                            <div id="dropdown-items-17" class="dropdown-items"></div>
-                            <div id="image-display-17" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input7" oninput="updateOutput()" placeholder="Nick 7" style="flex:1;">
-                    </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-18" oninput="filterDropdown(18)" placeholder="Pilih Hero 3">
-                            <div id="dropdown-items-18" class="dropdown-items"></div>
-                            <div id="image-display-18" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input8" oninput="updateOutput()" placeholder="Nick 8" style="flex:1;">
-                    </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-19" oninput="filterDropdown(19)" placeholder="Pilih Hero 4">
-                            <div id="dropdown-items-19" class="dropdown-items"></div>
-                            <div id="image-display-19" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input9" oninput="updateOutput()" placeholder="Nick 9" style="flex:1;">
-                    </div>
-                    <div style="display:flex; gap:5px; align-items: flex-start;">
-                        <div class="search-container" style="flex:2;">
-                            <input type="text" id="search-20" oninput="filterDropdown(20)" placeholder="Pilih Hero 5">
-                            <div id="dropdown-items-20" class="dropdown-items"></div>
-                            <div id="image-display-20" class="image-preview-slot"></div>
-                        </div>
-                        <input type="text" id="input10" oninput="updateOutput()" placeholder="Nick 10" style="flex:1;">
-                    </div>
-                </div>
-            </div>
+            <label style="margin-top:12px;">Blue Footer Text</label>
+            <input type="text" id="blueFooter" value="MATCH 1">
+            <label>Red Footer Text</label>
+            <input type="text" id="redFooter" value="MATCH 1">
         </div>
-
-        <button type="button" id="btn-update-all" style="background:#22c55e; color:#fff; font-size:16px;">KIRIM DATA KE OBS (LIVE)</button>
     </div>
 
-    <div style="display:none;">
-        <span id="tournamentnameOutput"></span>
-        <img id="image1" src=""><img id="image2" src="">
-        <input type="file" id="file1"><input type="file" id="file2">
-        <span id="teamNameDisplay1"></span><span id="teamNameDisplay2"></span>
-        <div id="extraImage1"></div><div id="extraImage2"></div><div id="extraImage3"></div>
-        <div id="extraImage4"></div><div id="extraImage5"></div><div id="extraImage6"></div>
-        <p id="output1"></p><p id="output2"></p><p id="output3"></p><p id="output4"></p><p id="output5"></p>
-        <p id="output6"></p><p id="output7"></p><p id="output8"></p><p id="output9"></p><p id="output10"></p>
+    <!-- ============================================================ -->
+    <!-- ACTION BUTTONS -->
+    <!-- ============================================================ -->
+    <div class="action-buttons">
+        <button class="btn-switch" onclick="switchInputs()">🔄 Tukar Semua Nickname</button>
+        <button class="btn-switch" onclick="switchAll()">🔀 Tukar Slot Tim Kiri & Kanan</button>
+        <button class="btn-reset" onclick="resetAllData()">🗑 RESET DATA DRAFT</button>
+        <button class="btn-send" id="btn-update-all">📡 KIRIM DATA KE OBS (LIVE)</button>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
+    <!-- ============================================================ -->
+    <!-- ROW 2: BLUE TEAM & RED TEAM -->
+    <!-- ============================================================ -->
+    <div class="row">
+        <!-- BLUE TEAM -->
+        <div class="col" style="border-left: 4px solid #00cfff;">
+            <h2>🔵 BLUE TEAM CONTROL</h2>
+            <label>Nama Tim Blue</label>
+            <input type="text" id="team1" value="BLUE TEAM" oninput="pushDataToLocal()">
+            <label>Logo Tim Blue</label>
+            <input type="text" id="blueLogo" value="Assets/Logo/default-blue.png" oninput="pushDataToLocal()">
 
-        // Menyalin database array kustom heromu 
-        const heroes = [
-            { name: 'Aamon', img: 'Assets/HeroPick/aamon.png' },
-            { name: 'Akai', img: 'Assets/HeroPick/akai.png' },
-            { name: 'Aldous', img: 'Assets/HeroPick/aldous.png' },
-            { name: 'Alice', img: 'Assets/HeroPick/alice.png' },
-            { name: 'Alpha', img: 'Assets/HeroPick/alpha.png' },
-            { name: 'Alucard', img: 'Assets/HeroPick/alucard.png' },
-            { name: 'Angela', img: 'Assets/HeroPick/angela.png' },
-            { name: 'Argus', img: 'Assets/HeroPick/argus.png' },
-            { name: 'Arlot', img: 'Assets/HeroPick/arlot.png' },
-            { name: 'Atlas', img: 'Assets/HeroPick/atlas.png' },
-            { name: 'Aulus', img: 'Assets/HeroPick/aulus.png' },
-            { name: 'Aurora', img: 'Assets/HeroPick/aurora.png' },
-            { name: 'Badang', img: 'Assets/HeroPick/badang.png' },
-            { name: 'Balmond', img: 'Assets/HeroPick/balmond.png' },
-            { name: 'Bane', img: 'Assets/HeroPick/bane.png' },
-            { name: 'Barats', img: 'Assets/HeroPick/barats.png' },
-            { name: 'Baxia', img: 'Assets/HeroPick/baxia.png' },
-            { name: 'Beatrix', img: 'Assets/HeroPick/beatrix.png' },
-            { name: 'Beleric', img: 'Assets/HeroPick/beleric.png' },
-            { name: 'Benedetta', img: 'Assets/HeroPick/benedetta.png' },
-            { name: 'Brody', img: 'Assets/HeroPick/brody.png' },
-            { name: 'Bruno', img: 'Assets/HeroPick/bruno.png' },
-            { name: 'Carmila', img: 'Assets/HeroPick/carmila.png' },
-            { name: 'Cecilion', img: 'Assets/HeroPick/cecilion.png' },
-            { name: "Chang'e", img: 'Assets/HeroPick/chang_e.png' },
-            { name: 'Chip', img: 'Assets/HeroPick/chip.png' },
-            { name: 'Chou', img: 'Assets/HeroPick/chou.png' },
-            { name: 'Cici', img: 'Assets/HeroPick/cici.png' },
-            { name: 'Claude', img: 'Assets/HeroPick/claude.png' },
-            { name: 'Clint', img: 'Assets/HeroPick/clint.png' },
-            { name: 'Cyclops', img: 'Assets/HeroPick/cyclops.png' },
-            { name: 'Diggie', img: 'Assets/HeroPick/diggie.png' },
-            { name: 'Dyroth', img: 'Assets/HeroPick/dyroth.png' },
-            { name: 'Edith', img: 'Assets/HeroPick/edith.png' },
-            { name: 'Esmeralda', img: 'Assets/HeroPick/esmeralda.png' },
-            { name: 'Estes', img: 'Assets/HeroPick/estes.png' },
-            { name: 'Eudora', img: 'Assets/HeroPick/eudora.png' },
-            { name: 'Fanny', img: 'Assets/HeroPick/fanny.png' },
-            { name: 'Faramis', img: 'Assets/HeroPick/faramis.png' },
-            { name: 'Floryn', img: 'Assets/HeroPick/floryn.png' },
-            { name: 'Franco', img: 'Assets/HeroPick/franco.png' },
-            { name: 'Fredrin', img: 'Assets/HeroPick/fredrin.png' },
-            { name: 'Freya', img: 'Assets/HeroPick/freya.png' },
-            { name: 'Gatotkaca', img: 'Assets/HeroPick/gatotkaca.png' },
-            { name: 'Gloo', img: 'Assets/HeroPick/gloo.png' },
-            { name: 'Gord', img: 'Assets/HeroPick/gord.png' },
-            { name: 'Granger', img: 'Assets/HeroPick/granger.png' },
-            { name: 'Grock', img: 'Assets/HeroPick/grock.png' },
-            { name: 'Guinevere', img: 'Assets/HeroPick/guinevere.png' },
-            { name: 'Gusion', img: 'Assets/HeroPick/gusion.png' },
-            { name: 'Hanabi', img: 'Assets/HeroPick/hanabi.png' },
-            { name: 'Hanzo', img: 'Assets/HeroPick/hanzo.png' },
-            { name: 'Harith', img: 'Assets/HeroPick/harith.png' },
-            { name: 'Harley', img: 'Assets/HeroPick/harley.png' },
-            { name: 'Hayabusa', img: 'Assets/HeroPick/hayabusa.png' },
-            { name: 'Helcurt', img: 'Assets/HeroPick/helcurt.png' },
-            { name: 'Hilda', img: 'Assets/HeroPick/hilda.png' },
-            { name: 'Hylos', img: 'Assets/HeroPick/hylos.png' },
-            { name: 'Irithel', img: 'Assets/HeroPick/irithel.png' },
-            { name: 'Ixia', img: 'Assets/HeroPick/ixia.png' },
-            { name: 'Jawhead', img: 'Assets/HeroPick/jawhead.png' },
-            { name: 'Johnson', img: 'Assets/HeroPick/johnson.png' },
-            { name: 'Joy', img: 'Assets/HeroPick/joy.png' },
-            { name: 'Julian', img: 'Assets/HeroPick/julian.png' },
-            { name: 'Kadita', img: 'Assets/HeroPick/kadita.png' },
-            { name: 'Kagura', img: 'Assets/HeroPick/kagura.png' },
-            { name: 'Kaja', img: 'Assets/HeroPick/kaja.png' },
-            { name: 'Karina', img: 'Assets/HeroPick/karina.png' },
-            { name: 'Karrie', img: 'Assets/HeroPick/karrie.png' },
-            { name: 'Khaleed', img: 'Assets/HeroPick/khaleed.png' },
-            { name: 'Khufra', img: 'Assets/HeroPick/khufra.png' },
-            { name: 'Kimmy', img: 'Assets/HeroPick/kimmy.png' },
-            { name: 'Lancelot', img: 'Assets/HeroPick/lancelot.png' },
-            { name: 'Lukas', img: 'Assets/HeroPick/lukas.png' },
-            { name: 'Lapu Lapu', img: 'Assets/HeroPick/lapulapu.png' },
-            { name: 'Layla', img: 'Assets/HeroPick/layla.png' },
-            { name: 'Leomord', img: 'Assets/HeroPick/leomord.png' },
-            { name: 'Lesley', img: 'Assets/HeroPick/lesley.png' },
-            { name: 'Ling', img: 'Assets/HeroPick/ling.png' },
-            { name: 'Lolita', img: 'Assets/HeroPick/lolita.png' },
-            { name: 'Lunox', img: 'Assets/HeroPick/lunox.png' },
-            { name: 'Luo Yi', img: 'Assets/HeroPick/luoyi.png' },
-            { name: 'Lylia', img: 'Assets/HeroPick/lylia.png' },
-            { name: 'Martis', img: 'Assets/HeroPick/martis.png' },
-            { name: 'Masha', img: 'Assets/HeroPick/masha.png' },
-            { name: 'Mathilda', img: 'Assets/HeroPick/mathilda.png' },
-            { name: 'Melissa', img: 'Assets/HeroPick/melissa.png' },
-            { name: 'Minotaur', img: 'Assets/HeroPick/minotour.png' },
-            { name: 'Minsitthar', img: 'Assets/HeroPick/minsitthar.png' },
-            { name: 'Miya', img: 'Assets/HeroPick/miya.png' },
-            { name: 'Moskov', img: 'Assets/HeroPick/moskov.png' },
-            { name: 'Nana', img: 'Assets/HeroPick/nana.png' },
-            { name: 'Natalia', img: 'Assets/HeroPick/natalia.png' },
-            { name: 'Nathan', img: 'Assets/HeroPick/nathan.png' },
-            { name: 'Nolan', img: 'Assets/HeroPick/nolan.png' },
-            { name: 'Novaria', img: 'Assets/HeroPick/novaria.png' },
-            { name: 'Odette', img: 'Assets/HeroPick/odette.png' },
-            { name: 'Paquito', img: 'Assets/HeroPick/paquito.png' },
-            { name: 'Parsha', img: 'Assets/HeroPick/parsha.png' },
-            { name: 'Phoveus', img: 'Assets/HeroPick/phoveus.png' },
-            { name: 'Popol and Kupa', img: 'Assets/HeroPick/popolandkupa.png' },
-            { name: 'Rafaela', img: 'Assets/HeroPick/rafaela.png' },
-            { name: 'Roger', img: 'Assets/HeroPick/roger.png' },
-            { name: 'Ruby', img: 'Assets/HeroPick/ruby.png' },
-            { name: 'Saber', img: 'Assets/HeroPick/saber.png' },
-            { name: 'Selena', img: 'Assets/HeroPick/selena.png' },
-            { name: 'Silvanna', img: 'Assets/HeroPick/silvanna.png' },
-            { name: 'Sun', img: 'Assets/HeroPick/sun.png' },
-            { name: 'Suyou', img: 'Assets/HeroPick/suyou.png' },
-            { name: 'Terizla', img: 'Assets/HeroPick/terizla.png' },
-            { name: 'Thamuz', img: 'Assets/HeroPick/thamuz.png' },
-            { name: 'Tigreal', img: 'Assets/HeroPick/tigreal.png' },
-            { name: 'Uranus', img: 'Assets/HeroPick/uranus.png' },
-            { name: 'Vale', img: 'Assets/HeroPick/vale.png' },
-            { name: 'Valentina', img: 'Assets/HeroPick/valentina.png' },
-            { name: 'Valir', img: 'Assets/HeroPick/valir.png' },
-            { name: 'Vexana', img: 'Assets/HeroPick/vexana.png' },
-            { name: 'Wanwan', img: 'Assets/HeroPick/wanwan.png' },
-            { name: 'Xavier', img: 'Assets/HeroPick/xavier.png' },
-            { name: 'Xborg', img: 'Assets/HeroPick/xborg.png' },
-            { name: 'Yin', img: 'Assets/HeroPick/yin.png' },
-            { name: 'Yisunshin', img: 'Assets/HeroPick/yisunshin.png' },
-            { name: 'Yuzhong', img: 'Assets/HeroPick/yuzhong.png' },
-            { name: 'Yve', img: 'Assets/HeroPick/yve.png' },
-            { name: 'Zhask', img: 'Assets/HeroPick/zhask.png' },
-            { name: 'Zhuxin', img: 'Assets/HeroPick/zhuxin.png' },
-            { name: 'Zilong', img: 'Assets/HeroPick/zilong.png' }
-        ];
+            <h3>🚫 Bans (Ketik nama hero)</h3>
+            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
+                <div class="search-container">
+                    <input type="text" id="search-1" oninput="filterDropdown(1)" placeholder="Ban 1">
+                    <div id="dropdown-items-1" class="dropdown-items"></div>
+                    <div id="image-display-1" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-2" oninput="filterDropdown(2)" placeholder="Ban 2">
+                    <div id="dropdown-items-2" class="dropdown-items"></div>
+                    <div id="image-display-2" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-3" oninput="filterDropdown(3)" placeholder="Ban 3">
+                    <div id="dropdown-items-3" class="dropdown-items"></div>
+                    <div id="image-display-3" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-4" oninput="filterDropdown(4)" placeholder="Ban 4">
+                    <div id="dropdown-items-4" class="dropdown-items"></div>
+                    <div id="image-display-4" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-5" oninput="filterDropdown(5)" placeholder="Ban 5">
+                    <div id="dropdown-items-5" class="dropdown-items"></div>
+                    <div id="image-display-5" class="image-preview-slot"></div>
+                </div>
+            </div>
 
-        // Memperbaiki path database agar tidak memakai '/' di awal root (agar cocok dengan lokal Node.js)
-        heroes.forEach(h => {
-            if(h.img.startsWith('/')) h.img = h.img.substring(1);
-        });
+            <h3>⚔️ Picks & Nicknames</h3>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-6" oninput="filterDropdown(6)" placeholder="Pilih Hero 1">
+                        <div id="dropdown-items-6" class="dropdown-items"></div>
+                        <div id="image-display-6" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input1" oninput="pushDataToLocal()" placeholder="Nick 1" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-7" oninput="filterDropdown(7)" placeholder="Pilih Hero 2">
+                        <div id="dropdown-items-7" class="dropdown-items"></div>
+                        <div id="image-display-7" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input2" oninput="pushDataToLocal()" placeholder="Nick 2" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-8" oninput="filterDropdown(8)" placeholder="Pilih Hero 3">
+                        <div id="dropdown-items-8" class="dropdown-items"></div>
+                        <div id="image-display-8" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input3" oninput="pushDataToLocal()" placeholder="Nick 3" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-9" oninput="filterDropdown(9)" placeholder="Pilih Hero 4">
+                        <div id="dropdown-items-9" class="dropdown-items"></div>
+                        <div id="image-display-9" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input4" oninput="pushDataToLocal()" placeholder="Nick 4" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-10" oninput="filterDropdown(10)" placeholder="Pilih Hero 5">
+                        <div id="dropdown-items-10" class="dropdown-items"></div>
+                        <div id="image-display-10" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input5" oninput="pushDataToLocal()" placeholder="Nick 5" style="flex:1;">
+                </div>
+            </div>
+        </div>
 
-        // 1. FILTER DROPDOWN
-        function filterDropdown(id) {
-            const searchInput = document.getElementById(`search-${id}`).value.toLowerCase();
-            const dropdownItems = document.getElementById(`dropdown-items-${id}`);
-            dropdownItems.innerHTML = ''; 
+        <!-- RED TEAM -->
+        <div class="col" style="border-left: 4px solid #ff2a6d;">
+            <h2>🔴 RED TEAM CONTROL</h2>
+            <label>Nama Tim Red</label>
+            <input type="text" id="team2" value="RED TEAM" oninput="pushDataToLocal()">
+            <label>Logo Tim Red</label>
+            <input type="text" id="redLogo" value="Assets/Logo/default-red.png" oninput="pushDataToLocal()">
 
-            if(!searchInput) return;
+            <h3>🚫 Bans (Ketik nama hero)</h3>
+            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
+                <div class="search-container">
+                    <input type="text" id="search-11" oninput="filterDropdown(11)" placeholder="Ban 1">
+                    <div id="dropdown-items-11" class="dropdown-items"></div>
+                    <div id="image-display-11" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-12" oninput="filterDropdown(12)" placeholder="Ban 2">
+                    <div id="dropdown-items-12" class="dropdown-items"></div>
+                    <div id="image-display-12" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-13" oninput="filterDropdown(13)" placeholder="Ban 3">
+                    <div id="dropdown-items-13" class="dropdown-items"></div>
+                    <div id="image-display-13" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-14" oninput="filterDropdown(14)" placeholder="Ban 4">
+                    <div id="dropdown-items-14" class="dropdown-items"></div>
+                    <div id="image-display-14" class="image-preview-slot"></div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-15" oninput="filterDropdown(15)" placeholder="Ban 5">
+                    <div id="dropdown-items-15" class="dropdown-items"></div>
+                    <div id="image-display-15" class="image-preview-slot"></div>
+                </div>
+            </div>
 
-            heroes
-                .filter(hero => hero.name.toLowerCase().includes(searchInput))
-                .forEach(hero => {
-                    const item = document.createElement('div');
-                    item.classList.add('dropdown-item');
-                    item.textContent = hero.name;
-                    item.onclick = () => selectHero(hero, id);
-                    dropdownItems.appendChild(item);
-                });
-        }
+            <h3>⚔️ Picks & Nicknames</h3>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-16" oninput="filterDropdown(16)" placeholder="Pilih Hero 1">
+                        <div id="dropdown-items-16" class="dropdown-items"></div>
+                        <div id="image-display-16" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input6" oninput="pushDataToLocal()" placeholder="Nick 6" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-17" oninput="filterDropdown(17)" placeholder="Pilih Hero 2">
+                        <div id="dropdown-items-17" class="dropdown-items"></div>
+                        <div id="image-display-17" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input7" oninput="pushDataToLocal()" placeholder="Nick 7" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-18" oninput="filterDropdown(18)" placeholder="Pilih Hero 3">
+                        <div id="dropdown-items-18" class="dropdown-items"></div>
+                        <div id="image-display-18" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input8" oninput="pushDataToLocal()" placeholder="Nick 8" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-19" oninput="filterDropdown(19)" placeholder="Pilih Hero 4">
+                        <div id="dropdown-items-19" class="dropdown-items"></div>
+                        <div id="image-display-19" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input9" oninput="pushDataToLocal()" placeholder="Nick 9" style="flex:1;">
+                </div>
+                <div style="display:flex; gap:5px; align-items: flex-start;">
+                    <div class="search-container" style="flex:2;">
+                        <input type="text" id="search-20" oninput="filterDropdown(20)" placeholder="Pilih Hero 5">
+                        <div id="dropdown-items-20" class="dropdown-items"></div>
+                        <div id="image-display-20" class="image-preview-slot"></div>
+                    </div>
+                    <input type="text" id="input10" oninput="pushDataToLocal()" placeholder="Nick 10" style="flex:1;">
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 2. SELEKSI HERO DENGAN ANIMASI
-        function selectHero(hero, id) {
-            const imageDisplay = document.getElementById(`image-display-${id}`);
-            const existingImage = imageDisplay.querySelector('img');
+    <button type="button" id="btn-update-all" style="background:#22c55e; color:#fff; font-size:16px; padding:14px;">📡 KIRIM DATA KE OBS (LIVE)</button>
+</div>
 
-            if (existingImage) {
-                existingImage.classList.add('fly-out');
-                setTimeout(() => { updateHeroImage(hero, id); }, 200);
+<!-- Hidden elements untuk kompatibilitas -->
+<div style="display:none;">
+    <span id="tournamentnameOutput"></span>
+    <img id="image1" src=""><img id="image2" src="">
+    <input type="file" id="file1"><input type="file" id="file2">
+    <span id="teamNameDisplay1"></span><span id="teamNameDisplay2"></span>
+    <p id="output1"></p><p id="output2"></p><p id="output3"></p><p id="output4"></p><p id="output5"></p>
+    <p id="output6"></p><p id="output7"></p><p id="output8"></p><p id="output9"></p><p id="output10"></p>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+// ============================================================
+// DATABASE HERO
+// ============================================================
+const heroes = [
+    { name: 'Kalea', img: 'Assets/HeroPick/kalea.png' },
+    { name: 'Sora', img: 'Assets/HeroPick/sora.png' },
+    { name: 'Zetian', img: 'Assets/HeroPick/zetian.png' },
+    { name: 'Obsidia', img: 'Assets/HeroPick/obsidia.png' },
+    { name: 'Marcel', img: 'Assets/HeroPick/marcel.png' },
+    { name: 'Hirara', img: 'Assets/HeroPick/hirara.png' },
+    { name: 'Aamon', img: 'Assets/HeroPick/aamon.png' },
+    { name: 'Akai', img: 'Assets/HeroPick/akai.png' },
+    { name: 'Aldous', img: 'Assets/HeroPick/aldous.png' },
+    { name: 'Alice', img: 'Assets/HeroPick/alice.png' },
+    { name: 'Alpha', img: 'Assets/HeroPick/alpha.png' },
+    { name: 'Alucard', img: 'Assets/HeroPick/alucard.png' },
+    { name: 'Angela', img: 'Assets/HeroPick/angela.png' },
+    { name: 'Argus', img: 'Assets/HeroPick/argus.png' },
+    { name: 'Arlot', img: 'Assets/HeroPick/arlot.png' },
+    { name: 'Atlas', img: 'Assets/HeroPick/atlas.png' },
+    { name: 'Aulus', img: 'Assets/HeroPick/aulus.png' },
+    { name: 'Aurora', img: 'Assets/HeroPick/aurora.png' },
+    { name: 'Badang', img: 'Assets/HeroPick/badang.png' },
+    { name: 'Balmond', img: 'Assets/HeroPick/balmond.png' },
+    { name: 'Bane', img: 'Assets/HeroPick/bane.png' },
+    { name: 'Barats', img: 'Assets/HeroPick/barats.png' },
+    { name: 'Baxia', img: 'Assets/HeroPick/baxia.png' },
+    { name: 'Beatrix', img: 'Assets/HeroPick/beatrix.png' },
+    { name: 'Beleric', img: 'Assets/HeroPick/beleric.png' },
+    { name: 'Benedetta', img: 'Assets/HeroPick/benedetta.png' },
+    { name: 'Brody', img: 'Assets/HeroPick/brody.png' },
+    { name: 'Bruno', img: 'Assets/HeroPick/bruno.png' },
+    { name: 'Carmila', img: 'Assets/HeroPick/carmila.png' },
+    { name: 'Cecilion', img: 'Assets/HeroPick/cecilion.png' },
+    { name: "Chang'e", img: 'Assets/HeroPick/chang_e.png' },
+    { name: 'Chip', img: 'Assets/HeroPick/chip.png' },
+    { name: 'Chou', img: 'Assets/HeroPick/chou.png' },
+    { name: 'Cici', img: 'Assets/HeroPick/cici.png' },
+    { name: 'Claude', img: 'Assets/HeroPick/claude.png' },
+    { name: 'Clint', img: 'Assets/HeroPick/clint.png' },
+    { name: 'Cyclops', img: 'Assets/HeroPick/cyclops.png' },
+    { name: 'Diggie', img: 'Assets/HeroPick/diggie.png' },
+    { name: 'Dyroth', img: 'Assets/HeroPick/dyroth.png' },
+    { name: 'Edith', img: 'Assets/HeroPick/edith.png' },
+    { name: 'Esmeralda', img: 'Assets/HeroPick/esmeralda.png' },
+    { name: 'Estes', img: 'Assets/HeroPick/estes.png' },
+    { name: 'Eudora', img: 'Assets/HeroPick/eudora.png' },
+    { name: 'Fanny', img: 'Assets/HeroPick/fanny.png' },
+    { name: 'Faramis', img: 'Assets/HeroPick/faramis.png' },
+    { name: 'Floryn', img: 'Assets/HeroPick/floryn.png' },
+    { name: 'Franco', img: 'Assets/HeroPick/franco.png' },
+    { name: 'Fredrin', img: 'Assets/HeroPick/fredrin.png' },
+    { name: 'Freya', img: 'Assets/HeroPick/freya.png' },
+    { name: 'Gatotkaca', img: 'Assets/HeroPick/gatotkaca.png' },
+    { name: 'Gloo', img: 'Assets/HeroPick/gloo.png' },
+    { name: 'Gord', img: 'Assets/HeroPick/gord.png' },
+    { name: 'Granger', img: 'Assets/HeroPick/granger.png' },
+    { name: 'Grock', img: 'Assets/HeroPick/grock.png' },
+    { name: 'Guinevere', img: 'Assets/HeroPick/guinevere.png' },
+    { name: 'Gusion', img: 'Assets/HeroPick/gusion.png' },
+    { name: 'Hanabi', img: 'Assets/HeroPick/hanabi.png' },
+    { name: 'Hanzo', img: 'Assets/HeroPick/hanzo.png' },
+    { name: 'Harith', img: 'Assets/HeroPick/harith.png' },
+    { name: 'Harley', img: 'Assets/HeroPick/harley.png' },
+    { name: 'Hayabusa', img: 'Assets/HeroPick/hayabusa.png' },
+    { name: 'Helcurt', img: 'Assets/HeroPick/helcurt.png' },
+    { name: 'Hilda', img: 'Assets/HeroPick/hilda.png' },
+    { name: 'Hylos', img: 'Assets/HeroPick/hylos.png' },
+    { name: 'Irithel', img: 'Assets/HeroPick/irithel.png' },
+    { name: 'Ixia', img: 'Assets/HeroPick/ixia.png' },
+    { name: 'Jawhead', img: 'Assets/HeroPick/jawhead.png' },
+    { name: 'Johnson', img: 'Assets/HeroPick/johnson.png' },
+    { name: 'Joy', img: 'Assets/HeroPick/joy.png' },
+    { name: 'Julian', img: 'Assets/HeroPick/julian.png' },
+    { name: 'Kadita', img: 'Assets/HeroPick/kadita.png' },
+    { name: 'Kagura', img: 'Assets/HeroPick/kagura.png' },
+    { name: 'Kaja', img: 'Assets/HeroPick/kaja.png' },
+    { name: 'Karina', img: 'Assets/HeroPick/karina.png' },
+    { name: 'Karrie', img: 'Assets/HeroPick/karrie.png' },
+    { name: 'Khaleed', img: 'Assets/HeroPick/khaleed.png' },
+    { name: 'Khufra', img: 'Assets/HeroPick/khufra.png' },
+    { name: 'Kimmy', img: 'Assets/HeroPick/kimmy.png' },
+    { name: 'Lancelot', img: 'Assets/HeroPick/lancelot.png' },
+    { name: 'Lukas', img: 'Assets/HeroPick/lukas.png' },
+    { name: 'Lapu Lapu', img: 'Assets/HeroPick/lapulapu.png' },
+    { name: 'Layla', img: 'Assets/HeroPick/layla.png' },
+    { name: 'Leomord', img: 'Assets/HeroPick/leomord.png' },
+    { name: 'Lesley', img: 'Assets/HeroPick/lesley.png' },
+    { name: 'Ling', img: 'Assets/HeroPick/ling.png' },
+    { name: 'Lolita', img: 'Assets/HeroPick/lolita.png' },
+    { name: 'Lunox', img: 'Assets/HeroPick/lunox.png' },
+    { name: 'Luo Yi', img: 'Assets/HeroPick/luoyi.png' },
+    { name: 'Lylia', img: 'Assets/HeroPick/lylia.png' },
+    { name: 'Martis', img: 'Assets/HeroPick/martis.png' },
+    { name: 'Masha', img: 'Assets/HeroPick/masha.png' },
+    { name: 'Mathilda', img: 'Assets/HeroPick/mathilda.png' },
+    { name: 'Melissa', img: 'Assets/HeroPick/melissa.png' },
+    { name: 'Minotaur', img: 'Assets/HeroPick/minotour.png' },
+    { name: 'Minsitthar', img: 'Assets/HeroPick/minsitthar.png' },
+    { name: 'Miya', img: 'Assets/HeroPick/miya.png' },
+    { name: 'Moskov', img: 'Assets/HeroPick/moskov.png' },
+    { name: 'Nana', img: 'Assets/HeroPick/nana.png' },
+    { name: 'Natalia', img: 'Assets/HeroPick/natalia.png' },
+    { name: 'Nathan', img: 'Assets/HeroPick/nathan.png' },
+    { name: 'Nolan', img: 'Assets/HeroPick/nolan.png' },
+    { name: 'Novaria', img: 'Assets/HeroPick/novaria.png' },
+    { name: 'Odette', img: 'Assets/HeroPick/odette.png' },
+    { name: 'Paquito', img: 'Assets/HeroPick/paquito.png' },
+    { name: 'Parsha', img: 'Assets/HeroPick/parsha.png' },
+    { name: 'Phoveus', img: 'Assets/HeroPick/phoveus.png' },
+    { name: 'Popol and Kupa', img: 'Assets/HeroPick/popolandkupa.png' },
+    { name: 'Rafaela', img: 'Assets/HeroPick/rafaela.png' },
+    { name: 'Roger', img: 'Assets/HeroPick/roger.png' },
+    { name: 'Ruby', img: 'Assets/HeroPick/ruby.png' },
+    { name: 'Saber', img: 'Assets/HeroPick/saber.png' },
+    { name: 'Selena', img: 'Assets/HeroPick/selena.png' },
+    { name: 'Silvanna', img: 'Assets/HeroPick/silvanna.png' },
+    { name: 'Sun', img: 'Assets/HeroPick/sun.png' },
+    { name: 'Suyou', img: 'Assets/HeroPick/suyou.png' },
+    { name: 'Terizla', img: 'Assets/HeroPick/terizla.png' },
+    { name: 'Thamuz', img: 'Assets/HeroPick/thamuz.png' },
+    { name: 'Tigreal', img: 'Assets/HeroPick/tigreal.png' },
+    { name: 'Uranus', img: 'Assets/HeroPick/uranus.png' },
+    { name: 'Vale', img: 'Assets/HeroPick/vale.png' },
+    { name: 'Valentina', img: 'Assets/HeroPick/valentina.png' },
+    { name: 'Valir', img: 'Assets/HeroPick/valir.png' },
+    { name: 'Vexana', img: 'Assets/HeroPick/vexana.png' },
+    { name: 'Wanwan', img: 'Assets/HeroPick/wanwan.png' },
+    { name: 'Xavier', img: 'Assets/HeroPick/xavier.png' },
+    { name: 'Xborg', img: 'Assets/HeroPick/xborg.png' },
+    { name: 'Yin', img: 'Assets/HeroPick/yin.png' },
+    { name: 'Yisunshin', img: 'Assets/HeroPick/yisunshin.png' },
+    { name: 'Yuzhong', img: 'Assets/HeroPick/yuzhong.png' },
+    { name: 'Yve', img: 'Assets/HeroPick/yve.png' },
+    { name: 'Zhask', img: 'Assets/HeroPick/zhask.png' },
+    { name: 'Zhuxin', img: 'Assets/HeroPick/zhuxin.png' },
+    { name: 'Zilong', img: 'Assets/HeroPick/zilong.png' }
+];
+
+// Fix path
+heroes.forEach(h => { if(h.img.startsWith('/')) h.img = h.img.substring(1); });
+
+// ============================================================
+// VARIABLES
+// ============================================================
+let currentFormat = 'bo5'; // 'bo3' or 'bo5'
+let countdownInterval = null;
+let timeLeft = 30;
+
+// ============================================================
+// FORMAT TOGGLE (BO3 / BO5)
+// ============================================================
+function setFormat(format) {
+    currentFormat = format;
+    
+    // Update tombol
+    document.getElementById('btn-bo3').className = 'toggle-btn' + (format === 'bo3' ? ' active-bo3' : '');
+    document.getElementById('btn-bo5').className = 'toggle-btn' + (format === 'bo5' ? ' active-bo5' : '');
+    
+    // Tampilkan/sembunyikan Win 3
+    const blueWin3 = document.getElementById('blueWin3Label');
+    const redWin3 = document.getElementById('redWin3Label');
+    const previewBlue3 = document.getElementById('preview-blue-3');
+    const previewRed3 = document.getElementById('preview-red-3');
+    
+    if (format === 'bo3') {
+        blueWin3.style.display = 'none';
+        redWin3.style.display = 'none';
+        previewBlue3.style.display = 'none';
+        previewRed3.style.display = 'none';
+        // Uncheck checkbox 3 & 6
+        document.getElementById('checkbox3').checked = false;
+        document.getElementById('checkbox6').checked = false;
+    } else {
+        blueWin3.style.display = 'inline-block';
+        redWin3.style.display = 'inline-block';
+        previewBlue3.style.display = 'block';
+        previewRed3.style.display = 'block';
+    }
+    
+    updateScorePreview();
+    pushDataToLocal();
+}
+
+// ============================================================
+// SCORE PREVIEW UPDATE
+// ============================================================
+function updateScorePreview() {
+    const format = currentFormat;
+    const maxScore = format === 'bo3' ? 2 : 3;
+    
+    // Blue
+    for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`preview-blue-${i}`);
+        const checkbox = document.getElementById(`checkbox${i}`);
+        if (dot) {
+            if (i <= maxScore) {
+                dot.style.display = 'block';
+                dot.className = 'score-dot' + (checkbox.checked ? ' active-blue' : ' inactive');
             } else {
-                updateHeroImage(hero, id);
+                dot.style.display = 'none';
             }
         }
-
-        function updateHeroImage(hero, id) {
-            const imageDisplay = document.getElementById(`image-display-${id}`);
-            imageDisplay.innerHTML = `<img src="${hero.img}" alt="${hero.name}" class="fly-in">`;
-            document.getElementById(`search-${id}`).value = hero.name;
-            document.getElementById(`dropdown-items-${id}`).innerHTML = ''; 
-            
-            // Otomatis kirim data langsung ke OBS sesaat setelah memilih Hero
-            pushDataToLocal();
-        }
-
-        // 3. RESET DROPDOWNS
-        function resetAllDropdowns() {
-            for (let i = 1; i <= 20; i++) {
-                const imageDisplay = document.getElementById(`image-display-${i}`);
-                if (imageDisplay && imageDisplay.innerHTML) {
-                    const img = imageDisplay.querySelector('img');
-                    if(img) img.classList.add('fly-out');
-                }
-
-                setTimeout(() => {
-                    if(document.getElementById(`search-${i}`)) document.getElementById(`search-${i}`).value = '';
-                    if(imageDisplay) imageDisplay.innerHTML = '';
-                    if(document.getElementById(`dropdown-items-${i}`)) document.getElementById(`dropdown-items-${i}`).innerHTML = '';
-                }, 200);
+    }
+    
+    // Red
+    for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`preview-red-${i}`);
+        const checkbox = document.getElementById(`checkbox${i+3}`);
+        if (dot) {
+            if (i <= maxScore) {
+                dot.style.display = 'block';
+                dot.className = 'score-dot' + (checkbox.checked ? ' active-red' : ' inactive');
+            } else {
+                dot.style.display = 'none';
             }
         }
+    }
+    
+    pushDataToLocal();
+}
 
-        // 4. RESET NICKNAMES & INPUT TEKS
-        function updateOutput() { /* Real-time sync via button broadcast */ }
-        function resetInputs() {
-            for (let i = 1; i <= 10; i++) {
-                document.getElementById('input' + i).value = '';
-            }
-        }
+// ============================================================
+// DROPDOWN FILTER
+// ============================================================
+function filterDropdown(id) {
+    const searchInput = document.getElementById(`search-${id}`).value.toLowerCase();
+    const dropdownItems = document.getElementById(`dropdown-items-${id}`);
+    dropdownItems.innerHTML = '';
+    if(!searchInput) return;
 
-        function switchInputs() {
-            for (let i = 1; i <= 5; i++) {
-                const temp = document.getElementById('input' + i).value;
-                document.getElementById('input' + i).value = document.getElementById('input' + (i + 5)).value;
-                document.getElementById('input' + (i + 5)).value = temp;
-            }
-            pushDataToLocal();
-        }
+    heroes
+        .filter(hero => hero.name.toLowerCase().includes(searchInput))
+        .forEach(hero => {
+            const item = document.createElement('div');
+            item.classList.add('dropdown-item');
+            item.textContent = hero.name;
+            item.onclick = () => selectHero(hero, id);
+            dropdownItems.appendChild(item);
+        });
+}
 
-        function updateTeamName() {}
-        function toggleImage(imageId) { pushDataToLocal(); }
+function selectHero(hero, id) {
+    const imageDisplay = document.getElementById(`image-display-${id}`);
+    imageDisplay.innerHTML = `<img src="${hero.img}" alt="${hero.name}" style="height:100%;width:auto;object-fit:contain;">`;
+    document.getElementById(`search-${id}`).value = hero.name;
+    document.getElementById(`dropdown-items-${id}`).innerHTML = '';
+    pushDataToLocal();
+}
 
-        function resetContent() {
-            document.getElementById('team1').value = "BLUE TEAM";
-            document.getElementById('team2').value = "RED TEAM";
-            document.getElementById('checkbox1').checked = false;
-            document.getElementById('checkbox2').checked = false;
-            document.getElementById('checkbox3').checked = false;
-            document.getElementById('checkbox4').checked = false;
-            pushDataToLocal();
-        }
+// ============================================================
+// RESET FUNCTIONS
+// ============================================================
+function resetAllDropdowns() {
+    for (let i = 1; i <= 20; i++) {
+        document.getElementById(`search-${i}`).value = '';
+        document.getElementById(`image-display-${i}`).innerHTML = '';
+        document.getElementById(`dropdown-items-${i}`).innerHTML = '';
+    }
+}
 
-        function switchAll() {
-            // Tukar Nama Tim
-            const t1 = document.getElementById('team1');
-            const t2 = document.getElementById('team2');
-            const tempName = t1.value; t1.value = t2.value; t2.value = tempName;
+function resetInputs() {
+    for (let i = 1; i <= 10; i++) {
+        document.getElementById('input' + i).value = '';
+    }
+}
 
-            // Tukar Logo
-            const l1 = document.getElementById('blueLogo');
-            const l2 = document.getElementById('redLogo');
-            const tempLogo = l1.value; l1.value = l2.value; l2.value = tempLogo;
+function resetAllData() {
+    if (!confirm('Reset semua data draft?')) return;
+    resetAllDropdowns();
+    resetInputs();
+    
+    document.getElementById('team1').value = 'BLUE TEAM';
+    document.getElementById('team2').value = 'RED TEAM';
+    document.getElementById('blueLogo').value = 'Assets/Logo/default-blue.png';
+    document.getElementById('redLogo').value = 'Assets/Logo/default-red.png';
+    document.getElementById('tournamentnamemid').value = 'GRAND FINAL';
+    document.getElementById('blueFooter').value = 'MATCH 1';
+    document.getElementById('redFooter').value = 'MATCH 1';
+    
+    for (let i = 1; i <= 6; i++) {
+        document.getElementById('checkbox' + i).checked = false;
+    }
+    
+    resetTimer();
+    updateScorePreview();
+    pushDataToLocal();
+}
 
-            // Tukar Score Win Tracker
-            const cb1 = document.getElementById('checkbox1').checked;
-            const cb2 = document.getElementById('checkbox2').checked;
-            document.getElementById('checkbox1').checked = document.getElementById('checkbox3').checked;
-            document.getElementById('checkbox2').checked = document.getElementById('checkbox4').checked;
-            document.getElementById('checkbox3').checked = cb1;
-            document.getElementById('checkbox4').checked = cb2;
+// ============================================================
+// SWITCH FUNCTIONS
+// ============================================================
+function switchInputs() {
+    for (let i = 1; i <= 5; i++) {
+        const temp = document.getElementById('input' + i).value;
+        document.getElementById('input' + i).value = document.getElementById('input' + (i + 5)).value;
+        document.getElementById('input' + (i + 5)).value = temp;
+    }
+    pushDataToLocal();
+}
 
-            // Tukar Input Pencarian & Preview Image (ID 1-10 ditukar dengan 11-20)
-            for(let i=1; i<=10; i++) {
-                const searchA = document.getElementById(`search-${i}`);
-                const searchB = document.getElementById(`search-${i+10}`);
-                const imgA = document.getElementById(`image-display-${i}`);
-                const imgB = document.getElementById(`image-display-${i+10}`);
+function switchAll() {
+    // Team names
+    const t1 = document.getElementById('team1');
+    const t2 = document.getElementById('team2');
+    const tempName = t1.value; t1.value = t2.value; t2.value = tempName;
 
-                const tempSearchVal = searchA.value;
-                searchA.value = searchB.value;
-                searchB.value = tempSearchVal;
+    // Logos
+    const l1 = document.getElementById('blueLogo');
+    const l2 = document.getElementById('redLogo');
+    const tempLogo = l1.value; l1.value = l2.value; l2.value = tempLogo;
 
-                const tempImgHtml = imgA.innerHTML;
-                imgA.innerHTML = imgB.innerHTML;
-                imgB.innerHTML = tempImgHtml;
-            }
+    // Scores
+    const maxScore = currentFormat === 'bo3' ? 2 : 3;
+    for (let i = 1; i <= maxScore; i++) {
+        const cbBlue = document.getElementById('checkbox' + i);
+        const cbRed = document.getElementById('checkbox' + (i + 3));
+        const temp = cbBlue.checked;
+        cbBlue.checked = cbRed.checked;
+        cbRed.checked = temp;
+    }
 
-            // Tukar Nickname Player
-            switchInputs();
-        }
+    // Bans & Picks (swap 1-10 with 11-20)
+    for (let i = 1; i <= 10; i++) {
+        const searchA = document.getElementById(`search-${i}`);
+        const searchB = document.getElementById(`search-${i+10}`);
+        const imgA = document.getElementById(`image-display-${i}`);
+        const imgB = document.getElementById(`image-display-${i+10}`);
+        
+        const tempSearch = searchA.value;
+        searchA.value = searchB.value;
+        searchB.value = tempSearch;
+        
+        const tempImg = imgA.innerHTML;
+        imgA.innerHTML = imgB.innerHTML;
+        imgB.innerHTML = tempImg;
+    }
 
-        // ==========================================================================
-        // TIMER ENGINE 
-        // ==========================================================================
-        let countdownInterval = null;
-        let timeLeft = 30;
+    switchInputs();
+    updateScorePreview();
+    pushDataToLocal();
+}
 
-        function startTimer() {
-            clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                timeLeft = parseInt(document.getElementById('timer-display').value);
-                if(timeLeft > 0) {
-                    timeLeft--;
-                    document.getElementById('timer-display').value = timeLeft;
-                    pushDataToLocal();
-                } else {
-                    clearInterval(countdownInterval);
-                    triggerAutoPick();
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() { clearInterval(countdownInterval); }
-        function resetTimer() {
-            clearInterval(countdownInterval);
-            timeLeft = 30;
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer() {
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+        timeLeft = parseInt(document.getElementById('timer-display').value);
+        if(timeLeft > 0) {
+            timeLeft--;
             document.getElementById('timer-display').value = timeLeft;
             pushDataToLocal();
+        } else {
+            clearInterval(countdownInterval);
         }
+    }, 1000);
+}
 
-        function triggerAutoPick() {
-            let slotDitemukan = false;
-            for (let id = 1; id <= 20; id++) {
-                const inputSearch = document.getElementById(`search-${id}`);
-                const imageDisplay = document.getElementById(`image-display-${id}`);
+function pauseTimer() { clearInterval(countdownInterval); }
+function resetTimer() {
+    clearInterval(countdownInterval);
+    timeLeft = 30;
+    document.getElementById('timer-display').value = timeLeft;
+    pushDataToLocal();
+}
 
-                if (inputSearch && (inputSearch.value.trim() === "" || !imageDisplay.innerHTML)) {
-                    const randomIndex = Math.floor(Math.random() * heroes.length);
-                    const randomHero = heroes[randomIndex];
-                    selectHero(randomHero, id);
-                    slotDitemukan = true;
-                    break;
-                }
-            }
-            if (!slotDitemukan) {
-                alert("Semua slot Pick dan Ban sudah terisi penuh!");
-                return;
-            }
-            resetTimer();
-            startTimer();
-        }
+// ============================================================
+// PUSH DATA TO SERVER (OBS)
+// ============================================================
+function pushDataToLocal() {
+    const currentTimer = document.getElementById('timer-display').value;
+    const maxScore = currentFormat === 'bo3' ? 2 : 3;
+    
+    const dataToUpdate = {
+        blueName: document.getElementById('team1').value,
+        redName: document.getElementById('team2').value,
+        blueLogo: document.getElementById('blueLogo').value,
+        redLogo: document.getElementById('redLogo').value,
+        matchTitle: document.getElementById('tournamentnamemid').value,
+        blueFooter: document.getElementById('blueFooter').value,
+        redFooter: document.getElementById('redFooter').value,
+        timerValue: currentTimer,
+        isCritical: parseInt(currentTimer) <= 5,
+        format: currentFormat
+    };
 
-        // ==========================================================================
-        // WEBSOCKET BROADCAST CONNECTOR (PENGIRIM UTAMA DATA KE OBS)
-        // ==========================================================================
-        function pushDataToLocal() {
-            const currentTimer = document.getElementById('timer-display').value;
-            
-            const dataToUpdate = {
-                blueName: document.getElementById('team1').value,
-                redName: document.getElementById('team2').value,
-                blueLogo: document.getElementById('blueLogo').value,
-                redLogo: document.getElementById('redLogo').value,
-                matchTitle: document.getElementById('tournamentnamemid').value,
-                blueFooter: document.getElementById('blueFooter').value,
-                redFooter: document.getElementById('redFooter').value,
-                timerValue: currentTimer,
-                isCritical: parseInt(currentTimer) <= 5,
+    // Score (sesuai format)
+    for (let i = 1; i <= 3; i++) {
+        dataToUpdate[`blueWin${i}`] = i <= maxScore ? document.getElementById(`checkbox${i}`).checked : false;
+        dataToUpdate[`redWin${i}`] = i <= maxScore ? document.getElementById(`checkbox${i+3}`).checked : false;
+    }
 
-                blueWin1: document.getElementById('checkbox1').checked,
-                blueWin2: document.getElementById('checkbox2').checked,
-                redWin1: document.getElementById('checkbox3').checked,
-                redWin2: document.getElementById('checkbox4').checked
-            };
+    // Blue Bans (1-5)
+    for (let i = 1; i <= 5; i++) {
+        const img = document.getElementById(`image-display-${i}`).querySelector('img');
+        dataToUpdate[`blueBan${i}`] = img ? img.getAttribute('src') : '';
+    }
 
-            // Mapping ID 1-5 ke blueBan1-5, ID 6-10 ke bluePick1-5
-            for(let i=1; i<=5; i++) {
-                const imgBanBlue = document.getElementById(`image-display-${i}`).querySelector('img');
-                dataToUpdate[`blueBan${i}`] = imgBanBlue ? imgBanBlue.getAttribute('src') : "";
-                
-                const imgPickBlue = document.getElementById(`image-display-${i+5}`).querySelector('img');
-                dataToUpdate[`bluePick${i}`] = imgPickBlue ? imgPickBlue.getAttribute('src') : "";
-                dataToUpdate[`blueNick${i}`] = document.getElementById(`input${i}`).value;
-            }
+    // Blue Picks (6-10)
+    for (let i = 1; i <= 5; i++) {
+        const img = document.getElementById(`image-display-${i+5}`).querySelector('img');
+        dataToUpdate[`bluePick${i}`] = img ? img.getAttribute('src') : '';
+        dataToUpdate[`blueNick${i}`] = document.getElementById(`input${i}`).value;
+    }
 
-            // Mapping ID 11-15 ke redBan1-5, ID 16-20 ke redPick1-5
-            for(let i=1; i<=5; i++) {
-                const imgBanRed = document.getElementById(`image-display-${i+10}`).querySelector('img');
-                dataToUpdate[`redBan${i}`] = imgBanRed ? imgBanRed.getAttribute('src') : "";
+    // Red Bans (11-15)
+    for (let i = 1; i <= 5; i++) {
+        const img = document.getElementById(`image-display-${i+10}`).querySelector('img');
+        dataToUpdate[`redBan${i}`] = img ? img.getAttribute('src') : '';
+    }
 
-                const imgPickRed = document.getElementById(`image-display-${i+15}`).querySelector('img');
-                dataToUpdate[`redPick${i}`] = imgPickRed ? imgPickRed.getAttribute('src') : "";
-                dataToUpdate[`redNick${i}`] = document.getElementById(`input${i+5}`).value;
-            }
+    // Red Picks (16-20)
+    for (let i = 1; i <= 5; i++) {
+        const img = document.getElementById(`image-display-${i+15}`).querySelector('img');
+        dataToUpdate[`redPick${i}`] = img ? img.getAttribute('src') : '';
+        dataToUpdate[`redNick${i}`] = document.getElementById(`input${i+5}`).value;
+    }
 
-            // Tembakkan langsung ke Node.js lokal
-            socket.emit('updateDraft', dataToUpdate);
-        }
+    socket.emit('updateDraft', dataToUpdate);
+}
 
-        // Pasang event listener ke tombol hijau kirim data
-        document.getElementById('btn-update-all').addEventListener('click', pushDataToLocal);
-    </script>
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('btn-update-all').addEventListener('click', pushDataToLocal);
+
+// Auto-send on any change
+document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('change', pushDataToLocal);
+    el.addEventListener('input', pushDataToLocal);
+});
+
+// ============================================================
+// INIT
+// ============================================================
+setFormat('bo5');
+pushDataToLocal();
+
+// Expose functions ke global
+window.filterDropdown = filterDropdown;
+window.selectHero = selectHero;
+window.resetAllDropdowns = resetAllDropdowns;
+window.resetInputs = resetInputs;
+window.switchInputs = switchInputs;
+window.switchAll = switchAll;
+window.resetAllData = resetAllData;
+window.startTimer = startTimer;
+window.pauseTimer = pauseTimer;
+window.resetTimer = resetTimer;
+window.pushDataToLocal = pushDataToLocal;
+window.updateScorePreview = updateScorePreview;
+window.setFormat = setFormat;
+</script>
 </body>
 </html>
